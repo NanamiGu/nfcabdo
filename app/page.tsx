@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { getActiveProfile } from "@/data/client";
 import { ProfilePage } from "@/components/profile/ProfilePage";
 import { DemoBar } from "@/components/DemoBar";
+import { notFound } from "next/navigation";
 
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,7 +33,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const profile = await getActiveProfile();
 
   return (
     <>

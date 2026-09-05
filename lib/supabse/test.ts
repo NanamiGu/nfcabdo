@@ -10,10 +10,22 @@ export async function testSupabaseConnection() {
 
   if (error) {
     console.error('Supabase error:', error)
-    return null
+
+    return {
+      success: false,
+      error: {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      },
+    }
   }
 
   console.log('Supabase profiles:', data)
 
-  return data
+  return {
+    success: true,
+    data,
+  }
 }

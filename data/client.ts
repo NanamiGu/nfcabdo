@@ -1,45 +1,85 @@
 import { Profile } from "@/types/profile";
-import { artexProfile } from "./profiles/artex";
-import { amineProfile } from "./profiles/amine";
-import { minimalProfile } from "./profiles/minimal";
-import { getProfileFromRegistry } from "./registry";
+import { createClient } from "../lib/supabse/server";
 
 /**
- * ACTIVE CLIENT CONFIGURATION
- * =============================================================
- * For single-client / single-card production deployments:
- * Change `client` to whatever profile should be the active root card.
- *
- * You do NOT need to touch any UI component code!
- * =============================================================
+ * Convert a Supabase database row into the application's Profile type.
  */
-export const client: Profile = artexProfile;
+function mapDatabaseProfile(row: any): Profile {
+  return {
+    ...row.profile_data,
 
-// Backward-compatibility exports
-export const personDemoProfile = amineProfile;
-export const companyDemoProfile = artexProfile;
-export { amineProfile, artexProfile, minimalProfile };
+    id: row.id,
+    slug: row.slug,
+    type: row.type,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  } as Profile;
+}
 
 /**
- * Async data fetcher for profile resolution.
- * Fully compatible with Next.js Server Components.
+ * Get a profile by its slug.
  *
- * Later, this function can query Prisma / Supabase / Postgres:
- *   const profile = await db.profile.findUnique({ where: { slug } });
- *   return profile;
+ * Example:
+ * /artex
+ * -> slug = "artex"
  */
 export async function getProfileBySlug(
   slug: string,
   expectedType?: "person" | "company"
 ): Promise<Profile | null> {
-  // Currently pulls from local registry.
-  // Ready to be replaced by DB adapter without changing UI code.
-  return getProfileFromRegistry(slug, expectedType);
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("profiles")
+    .select(
+      "id, slug, type, status, profile_data, created_at, updated_at"
+    )
+    .eq("slug", slug)
+    .eq("status", "active");
+
+  if (expectedType) {
+    query = query.eq("type", expectedType);
+  }
+
+  const { data, error } = await query.maybeSingle();
+
+  if (error) {
+    console.error("Error fetching profile:", error);
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return mapDatabaseProfile(data);
 }
 
 /**
- * Returns default active client profile for root / NFC access
+ * Get the active profile used by the root NFC page.
+ *
+ * This replaces the old:
+ * export const client = artexProfile;
  */
-export async function getActiveProfile(): Promise<Profile> {
-  return client;
+export async function getActiveProfile(): Promise<Profile | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, slug, type, status, profile_data, created_at, updated_at")
+    .eq("status", "active")
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching active profile:", error);
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return mapDatabaseProfile(data);
 }
