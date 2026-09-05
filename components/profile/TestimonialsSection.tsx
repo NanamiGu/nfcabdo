@@ -18,6 +18,11 @@ export function TestimonialsSection({
     return null;
   }
 
+  const visibleItems = testimonials.filter((t) => t.visible !== false);
+  if (visibleItems.length === 0) {
+    return null;
+  }
+
   return (
     <section aria-labelledby="testimonials-heading" className="w-full space-y-3.5">
       <div className="flex items-center justify-between px-1">
@@ -27,21 +32,24 @@ export function TestimonialsSection({
             id="testimonials-heading"
             className="text-sm font-bold tracking-wider uppercase text-(--profile-muted)"
           >
-            Client Endorsements
+            Endorsements & Testimonials
           </h2>
         </div>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-(--profile-surface) text-(--profile-muted) border border-(--profile-border)">
+          {visibleItems.length}
+        </span>
       </div>
 
       <div className="space-y-3">
-        {testimonials.map((t, idx) => {
-          const quoteText = t.text || t.quote || "";
+        {visibleItems.map((t, idx) => {
+          const quoteText = t.content || t.text || t.quote || "";
           const authorName = t.name || t.author || "Client";
 
           if (!quoteText.trim()) return null;
 
           return (
             <div
-              key={`${authorName}-${idx}`}
+              key={t.id || `${authorName}-${idx}`}
               className="p-4 sm:p-5 rounded-(--profile-radius) bg-(--profile-surface) border border-(--profile-border) shadow-sm space-y-3"
             >
               {/* Star Rating */}
@@ -57,11 +65,20 @@ export function TestimonialsSection({
               </p>
 
               {/* Author details */}
-              <div className="pt-1 border-t border-(--profile-border) flex items-center justify-between text-xs">
-                <span className="font-bold text-(--profile-text)">
-                  {authorName}
-                </span>
-                <span className="text-(--profile-muted) truncate max-w-50">
+              <div className="pt-2 border-t border-(--profile-border) flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5">
+                  {t.avatar && (
+                    <img
+                      src={t.avatar}
+                      alt={authorName}
+                      className="w-7 h-7 rounded-full object-cover border border-(--profile-border)"
+                    />
+                  )}
+                  <span className="font-bold text-(--profile-text)">
+                    {authorName}
+                  </span>
+                </div>
+                <span className="text-(--profile-muted) truncate max-w-50 text-right">
                   {[t.role, t.company].filter(Boolean).join(" • ")}
                 </span>
               </div>

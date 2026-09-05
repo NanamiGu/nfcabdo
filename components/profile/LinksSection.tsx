@@ -14,6 +14,11 @@ export function LinksSection({ links, showLinks = true }: LinksSectionProps) {
     return null;
   }
 
+  const visibleLinks = links.filter((l) => l.visible !== false);
+  if (visibleLinks.length === 0) {
+    return null;
+  }
+
   return (
     <section aria-labelledby="custom-links-heading" className="w-full space-y-3.5">
       <div className="flex items-center justify-between px-1">
@@ -23,25 +28,28 @@ export function LinksSection({ links, showLinks = true }: LinksSectionProps) {
             id="custom-links-heading"
             className="text-sm font-bold tracking-wider uppercase text-(--profile-muted)"
           >
-            Featured Resources & Links
+            Featured Links
           </h2>
         </div>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-(--profile-surface) text-(--profile-muted) border border-(--profile-border)">
+          {visibleLinks.length}
+        </span>
       </div>
 
       <div className="space-y-2.5">
-        {links.map((link, idx) => {
+        {visibleLinks.map((link, idx) => {
           const href = sanitizeUrl(link.url);
           const isHighlight = Boolean(link.highlight);
 
           return (
             <a
-              key={`${link.title}-${idx}`}
+              key={link.id || `${link.title}-${idx}`}
               href={href}
               target="_blank"
               rel="noopener noreferrer"
               className={`p-4 rounded-(--profile-radius) flex items-center justify-between gap-3.5 transition-all duration-150 active:scale-[0.98] group ${
                 isHighlight
-                  ? "bg-linear-to-r from-(--profile-surface) to-(--profile-primary)/10 border-2 border-(--profile-primary)/50 shadow-md"
+                  ? "bg-gradient-to-r from-(--profile-surface) to-(--profile-primary)/10 border-2 border-(--profile-primary)/50 shadow-md"
                   : "bg-(--profile-surface) hover:bg-(--profile-surface-hover) border border-(--profile-border)"
               }`}
             >
