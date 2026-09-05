@@ -1,5 +1,5 @@
 import { Profile } from "@/types/profile";
-import { createClient } from "../lib/supabse/server";
+import { createClient } from "../lib/supabase/server";
 
 /**
  * Convert a Supabase database row into the application's Profile type.

@@ -7,6 +7,10 @@ import { notFound } from "next/navigation";
 
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getActiveProfile();
+  if (!profile) {
+    notFound();
+  }
+
   const title = `${profile.profile.name} — ${profile.profile.title || "Digital Profile"}`;
   const description =
     profile.profile.bio ||
@@ -33,6 +37,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
+  const profile = await getActiveProfile();
+  if (!profile) {
+    notFound();
+  }
 
   return (
     <>
