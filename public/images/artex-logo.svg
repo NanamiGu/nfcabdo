@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="48" fill="#18181b" stroke="#27272a" stroke-width="2" />
+  <!-- Minimal geometric monogram "A" -->
+  <path d="M 60 150 L 100 50 L 140 150 M 75 120 L 125 120" fill="none" stroke="url(#logoGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="100" cy="50" r="8" fill="#f59e0b" />
+</svg>
