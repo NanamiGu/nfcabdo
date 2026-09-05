@@ -66,6 +66,34 @@ export async function getProfileBySlug(
 }
 
 /**
+ * Get a profile by its ID.
+ *
+ * Used by the Admin Dashboard for editing profiles of any status.
+ */
+export async function getProfileById(id: string): Promise<Profile | null> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(
+      "id, slug, type, status, profile_data, created_by, created_at, updated_at"
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching profile by ID:", error);
+    return null;
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return mapDatabaseProfile(data);
+}
+
+/**
  * Get the active profile used by the root NFC page.
  *
  * NOTE:

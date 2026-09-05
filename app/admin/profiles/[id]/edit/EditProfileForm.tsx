@@ -14,52 +14,34 @@ import {
   Loader2,
   CheckCircle2,
   Link2,
+  Save,
 } from "lucide-react";
-import { createProfileAction } from "./actions";
+import type { Profile } from "@/types/profile";
+import { updateProfileAction } from "./actions";
 
 const initialState = {
   error: "",
 };
 
-export default function CreateProfileForm() {
+interface EditProfileFormProps {
+  profile: Profile;
+}
+
+export default function EditProfileForm({ profile }: EditProfileFormProps) {
   const [state, formAction, pending] = useActionState(
-    createProfileAction,
+    updateProfileAction,
     initialState
   );
 
-  const [profileType, setProfileType] = useState<"person" | "company">("person");
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
-
-  // Auto-generate slug suggestion from name until user edits it manually
-  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const newName = e.target.value;
-    setName(newName);
-
-    if (!slugManuallyEdited) {
-      const generated = newName
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-");
-      setSlug(generated);
-    }
-  }
-
-  function handleSlugChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setSlugManuallyEdited(true);
-    setSlug(
-      e.target.value
-        .toLowerCase()
-        .replace(/\s+/g, "-")
-        .replace(/[^a-z0-9-_]/g, "")
-    );
-  }
+  const [profileType, setProfileType] = useState<"person" | "company">(profile.type);
+  const [name, setName] = useState(profile.profile.name);
+  const [slug, setSlug] = useState(profile.slug || "");
 
   return (
     <form action={formAction} className="space-y-6">
+      {/* Hidden Profile ID */}
+      <input type="hidden" name="id" value={profile.id} />
+
       {/* 1. Profile Type Selection */}
       <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
         <div className="flex items-center gap-2 mb-1">
@@ -176,19 +158,19 @@ export default function CreateProfileForm() {
           {/* Name */}
           <div className="sm:col-span-2">
             <label
-              htmlFor="profile-name"
+              htmlFor="edit-name"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2"
             >
               Full Name or Company Name <span className="text-red-500">*</span>
             </label>
             <input
-              id="profile-name"
+              id="edit-name"
               name="name"
               type="text"
               required
               value={name}
-              onChange={handleNameChange}
-              placeholder={profileType === "person" ? "e.g. Alex Morgan" : "e.g. Nexus Studio"}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Alex Morgan"
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition shadow-2xs"
             />
           </div>
@@ -197,7 +179,7 @@ export default function CreateProfileForm() {
           <div className="sm:col-span-2">
             <div className="flex items-center justify-between mb-2">
               <label
-                htmlFor="profile-slug"
+                htmlFor="edit-slug"
                 className="block text-xs font-semibold uppercase tracking-wider text-slate-700"
               >
                 Profile URL Slug <span className="text-red-500">*</span>
@@ -205,7 +187,7 @@ export default function CreateProfileForm() {
 
               {slug && (
                 <span className="text-xs text-slate-500 font-mono">
-                  Preview: <span className="text-slate-900 font-semibold">/{slug}</span>
+                  Current: <span className="text-slate-900 font-semibold">/{slug}</span>
                 </span>
               )}
             </div>
@@ -216,34 +198,42 @@ export default function CreateProfileForm() {
                 <span className="font-mono font-medium">/</span>
               </div>
               <input
-                id="profile-slug"
+                id="edit-slug"
                 name="slug"
                 type="text"
                 required
                 value={slug}
-                onChange={handleSlugChange}
+                onChange={(e) =>
+                  setSlug(
+                    e.target.value
+                      .toLowerCase()
+                      .replace(/\s+/g, "-")
+                      .replace(/[^a-z0-9-_]/g, "")
+                  )
+                }
                 placeholder="alex-morgan"
                 className="w-full border-0 bg-transparent px-3 py-3 text-sm font-mono text-slate-900 placeholder:text-slate-400 focus:outline-none"
               />
             </div>
             <p className="mt-1.5 text-xs text-slate-500">
-              The direct address accessed via NFC tap or QR scan. Use letters, numbers, and dashes.
+              The direct address accessed via NFC tap or QR scan.
             </p>
           </div>
 
           {/* Title */}
           <div>
             <label
-              htmlFor="profile-title"
+              htmlFor="edit-title"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2"
             >
               Professional Title / Tagline
             </label>
             <input
-              id="profile-title"
+              id="edit-title"
               name="title"
               type="text"
-              placeholder={profileType === "person" ? "Lead Product Designer" : "Creative & Tech Agency"}
+              defaultValue={profile.profile.title || ""}
+              placeholder="Lead Product Designer"
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition shadow-2xs"
             />
           </div>
@@ -251,16 +241,17 @@ export default function CreateProfileForm() {
           {/* Subtitle */}
           <div>
             <label
-              htmlFor="profile-subtitle"
+              htmlFor="edit-subtitle"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2"
             >
               Subtitle / Department
             </label>
             <input
-              id="profile-subtitle"
+              id="edit-subtitle"
               name="subtitle"
               type="text"
-              placeholder={profileType === "person" ? "Product & Design Systems" : "Digital Transformation"}
+              defaultValue={profile.profile.subtitle || ""}
+              placeholder="Product & Design Systems"
               className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition shadow-2xs"
             />
           </div>
@@ -268,15 +259,16 @@ export default function CreateProfileForm() {
           {/* Bio */}
           <div className="sm:col-span-2">
             <label
-              htmlFor="profile-bio"
+              htmlFor="edit-bio"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2"
             >
               Bio / About Summary
             </label>
             <textarea
-              id="profile-bio"
+              id="edit-bio"
               name="bio"
               rows={4}
+              defaultValue={profile.profile.bio || ""}
               placeholder="A brief overview introducing the person or business to visitors on the card..."
               className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition shadow-2xs"
             />
@@ -299,7 +291,7 @@ export default function CreateProfileForm() {
           {/* Phone */}
           <div>
             <label
-              htmlFor="profile-phone"
+              htmlFor="edit-phone"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2"
             >
               Phone Number
@@ -309,9 +301,10 @@ export default function CreateProfileForm() {
                 <Phone className="h-4 w-4" />
               </div>
               <input
-                id="profile-phone"
+                id="edit-phone"
                 name="phone"
                 type="tel"
+                defaultValue={profile.contact?.phone || ""}
                 placeholder="+213 550 123 456"
                 className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition shadow-2xs"
               />
@@ -321,7 +314,7 @@ export default function CreateProfileForm() {
           {/* WhatsApp */}
           <div>
             <label
-              htmlFor="profile-whatsapp"
+              htmlFor="edit-whatsapp"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2"
             >
               WhatsApp
@@ -331,9 +324,10 @@ export default function CreateProfileForm() {
                 <MessageSquare className="h-4 w-4" />
               </div>
               <input
-                id="profile-whatsapp"
+                id="edit-whatsapp"
                 name="whatsapp"
                 type="tel"
+                defaultValue={profile.contact?.whatsapp || ""}
                 placeholder="+213 550 123 456"
                 className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition shadow-2xs"
               />
@@ -343,7 +337,7 @@ export default function CreateProfileForm() {
           {/* Email */}
           <div>
             <label
-              htmlFor="profile-email"
+              htmlFor="edit-email"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2"
             >
               Email Address
@@ -353,9 +347,10 @@ export default function CreateProfileForm() {
                 <Mail className="h-4 w-4" />
               </div>
               <input
-                id="profile-email"
+                id="edit-email"
                 name="email"
                 type="email"
+                defaultValue={profile.contact?.email || ""}
                 placeholder="contact@nexus.com"
                 className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition shadow-2xs"
               />
@@ -365,7 +360,7 @@ export default function CreateProfileForm() {
           {/* Website */}
           <div>
             <label
-              htmlFor="profile-website"
+              htmlFor="edit-website"
               className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2"
             >
               Website URL
@@ -375,9 +370,10 @@ export default function CreateProfileForm() {
                 <Globe className="h-4 w-4" />
               </div>
               <input
-                id="profile-website"
+                id="edit-website"
                 name="website"
                 type="url"
+                defaultValue={profile.contact?.website || ""}
                 placeholder="https://nexus.com"
                 className="w-full rounded-xl border border-slate-300 bg-white pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition shadow-2xs"
               />
@@ -392,12 +388,12 @@ export default function CreateProfileForm() {
           Publishing Status
         </h2>
         <p className="text-xs text-slate-500 mt-0.5 mb-4">
-          Control accessibility of this profile upon creation.
+          Control accessibility of this profile across NFC cards and public URLs.
         </p>
 
         <select
           name="status"
-          defaultValue="draft"
+          defaultValue={profile.status || "draft"}
           className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 focus:outline-none transition shadow-2xs cursor-pointer"
         >
           <option value="draft">
@@ -417,7 +413,7 @@ export default function CreateProfileForm() {
         <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-2xs">
           <AlertCircle className="h-5 w-5 shrink-0 text-red-600 mt-0.5" />
           <div>
-            <p className="font-semibold text-red-900">Unable to create profile</p>
+            <p className="font-semibold text-red-900">Unable to save profile</p>
             <p className="mt-0.5 text-xs text-red-700">{state.error}</p>
           </div>
         </div>
@@ -440,12 +436,12 @@ export default function CreateProfileForm() {
           {pending ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Creating Client...</span>
+              <span>Saving Changes...</span>
             </>
           ) : (
             <>
-              <Sparkles className="h-4 w-4" />
-              <span>Create Client Profile</span>
+              <Save className="h-4 w-4" />
+              <span>Save Changes</span>
             </>
           )}
         </button>
