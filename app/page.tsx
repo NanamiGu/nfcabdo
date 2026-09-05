@@ -3,6 +3,7 @@ import { getActiveProfile } from "@/data/client";
 import { ProfilePage } from "@/components/profile/ProfilePage";
 import { DemoBar } from "@/components/DemoBar";
 
+
 export async function generateMetadata(): Promise<Metadata> {
   const profile = await getActiveProfile();
   const title = `${profile.profile.name} — ${profile.profile.title || "Digital Profile"}`;
