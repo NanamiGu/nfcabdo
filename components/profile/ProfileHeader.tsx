@@ -1,66 +1,34 @@
-"use client";
-
-import React, { useState } from "react";
-import Image from "next/image";
+import React from "react";
 import { CheckCircle2, Building2 } from "lucide-react";
 import { Profile } from "@/types/profile";
-import { getInitials } from "@/lib/utils";
+import { ProfileAvatar } from "./ProfileAvatar";
+import { CoverBanner } from "./CoverBanner";
 
 interface ProfileHeaderProps {
   profile: Profile;
 }
 
+/**
+ * ProfileHeader (Server Component)
+ * Renders the top profile identity card on the server for instant mobile loading.
+ */
 export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const { profile: info, type } = profile;
   const isCompany = type === "company";
   const imageSrc = isCompany ? info.logo : (info.avatar || info.logo);
-  const [imageError, setImageError] = useState(false);
-  const [coverError, setCoverError] = useState(false);
-
-  const hasCover = Boolean(info.coverImage && !coverError);
+  const hasCover = Boolean(info.coverImage);
 
   return (
     <header className="relative w-full rounded-(--profile-radius) overflow-hidden bg-(--profile-surface) border border-(--profile-border) shadow-xl">
       {/* Optional Cover Banner */}
-      {hasCover ? (
-        <div className="relative w-full h-36 sm:h-44 overflow-hidden bg-black/40">
-          <Image
-            src={info.coverImage!}
-            alt={`${info.name} cover`}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 640px"
-            className="object-cover object-center transition-opacity duration-300"
-            onError={() => setCoverError(true)}
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-(--profile-surface) via-transparent to-black/20" />
-        </div>
-      ) : (
-        <div className="w-full h-12 bg-linear-to-r from-(--profile-primary)/10 via-(--profile-secondary)/10 to-transparent" />
-      )}
+      <CoverBanner coverImage={info.coverImage} name={info.name} />
 
       {/* Main Profile Info */}
       <div className={`px-5 pb-6 text-center ${hasCover ? "-mt-14" : "-mt-2"}`}>
         {/* Avatar / Logo */}
         <div className="relative inline-block mx-auto mb-3.5">
           <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden p-1 bg-(--profile-surface) border-2 border-(--profile-border) shadow-lg">
-            {imageSrc && !imageError ? (
-              <div className="relative w-full h-full rounded-full overflow-hidden bg-(--profile-surface)">
-                <Image
-                  src={imageSrc}
-                  alt={info.name}
-                  fill
-                  priority
-                  sizes="112px"
-                  className="object-cover object-center"
-                  onError={() => setImageError(true)}
-                />
-              </div>
-            ) : (
-              <div className="w-full h-full rounded-full flex items-center justify-center bg-linear-to-br from-(--profile-primary)/20 to-(--profile-secondary)/20 text-(--profile-primary) font-bold text-2xl tracking-wider">
-                {getInitials(info.name)}
-              </div>
-            )}
+            <ProfileAvatar imageSrc={imageSrc} name={info.name} />
           </div>
 
           {/* Verified Badge */}
@@ -83,7 +51,9 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--profile-text)">
               {info.name}
             </h1>
-            <span className="sr-only">({isCompany ? "Company Profile" : "Personal Profile"})</span>
+            <span className="sr-only">
+              ({isCompany ? "Company Profile" : "Personal Profile"})
+            </span>
           </div>
 
           {info.title && (

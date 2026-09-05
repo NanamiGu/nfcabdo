@@ -1,100 +1,44 @@
 import { Profile } from "@/types/profile";
-import { personDemoProfile } from "./demo/person";
-import { companyDemoProfile } from "./demo/company";
+import { artexProfile } from "./profiles/artex";
+import { amineProfile } from "./profiles/amine";
+import { minimalProfile } from "./profiles/minimal";
+import { getProfileFromRegistry } from "./registry";
 
 /**
  * ACTIVE CLIENT CONFIGURATION
  * =============================================================
  * For single-client / single-card production deployments:
- * Simply replace or update this `client` object.
- *
- * Switch to `personDemoProfile` or `companyDemoProfile`, or define
- * a new custom profile object here.
+ * Change `client` to whatever profile should be the active root card.
  *
  * You do NOT need to touch any UI component code!
  * =============================================================
  */
-export const client: Profile = companyDemoProfile;
+export const client: Profile = artexProfile;
 
-/**
- * Local Profile Registry for dynamic NFC routes:
- *   - /p/[username] (Personal profile)
- *   - /c/[slug]     (Company profile)
- *
- * Architecture note:
- * This registry acts as a mock database adapter. When ready to connect
- * Supabase, Prisma, MongoDB, or an external API, only `getProfileBySlug`
- * needs to be updated. The UI layer will remain 100% untouched.
- */
-const profileDatabase: Record<string, Profile> = {
-  // Personal profiles
-  amine: personDemoProfile,
-
-  // Company profiles
-  artex: companyDemoProfile,
-
-  // Minimal test profile for edge-case verification
-  minimal: {
-    type: "person",
-    profile: {
-      name: "Sara Nour",
-      username: "minimal",
-      title: "Architect",
-      bio: "Crafting sustainable living spaces."
-    },
-    contact: {
-      phone: "+213555998877",
-      email: "sara@nour-arch.dz"
-    },
-    social: {
-      instagram: "https://instagram.com/saranour"
-    },
-    settings: {
-      showAbout: true,
-      showServices: false,
-      showProjects: false,
-      showProducts: false,
-      showTestimonials: false,
-      showLocation: false,
-      showSocial: true,
-      showBooking: false,
-      showLinks: false,
-      showSaveContact: true
-    },
-    theme: {
-      mode: "dark",
-      primaryColor: "#10b981",
-      secondaryColor: "#059669",
-      backgroundColor: "#06130d",
-      surfaceColor: "#0b2017",
-      textColor: "#ecfdf5",
-      mutedColor: "#6ee7b7",
-      borderRadius: "medium"
-    }
-  }
-};
+// Backward-compatibility exports
+export const personDemoProfile = amineProfile;
+export const companyDemoProfile = artexProfile;
+export { amineProfile, artexProfile, minimalProfile };
 
 /**
  * Async data fetcher for profile resolution.
  * Fully compatible with Next.js Server Components.
+ *
+ * Later, this function can query Prisma / Supabase / Postgres:
+ *   const profile = await db.profile.findUnique({ where: { slug } });
+ *   return profile;
  */
 export async function getProfileBySlug(
   slug: string,
   expectedType?: "person" | "company"
 ): Promise<Profile | null> {
-  const normalized = slug.toLowerCase().trim();
-  const profile = profileDatabase[normalized] || null;
-
-  if (!profile) return null;
-  if (expectedType && profile.type !== expectedType) {
-    return null;
-  }
-
-  return profile;
+  // Currently pulls from local registry.
+  // Ready to be replaced by DB adapter without changing UI code.
+  return getProfileFromRegistry(slug, expectedType);
 }
 
 /**
- * Returns default active client profile
+ * Returns default active client profile for root / NFC access
  */
 export async function getActiveProfile(): Promise<Profile> {
   return client;

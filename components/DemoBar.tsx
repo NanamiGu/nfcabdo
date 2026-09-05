@@ -22,9 +22,9 @@ export function DemoBar() {
 
         <div className="flex items-center gap-1.5">
           <Link
-            href="/c/artex"
+            href="/artex"
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${
-              pathname === "/c/artex" || pathname === "/"
+              pathname === "/artex" || pathname === "/"
                 ? "bg-amber-500 text-black font-bold shadow-sm"
                 : "bg-white/10 hover:bg-white/20 text-neutral-300"
             }`}
@@ -34,9 +34,9 @@ export function DemoBar() {
           </Link>
 
           <Link
-            href="/p/amine"
+            href="/amine"
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${
-              pathname === "/p/amine"
+              pathname === "/amine"
                 ? "bg-sky-500 text-black font-bold shadow-sm"
                 : "bg-white/10 hover:bg-white/20 text-neutral-300"
             }`}
@@ -46,9 +46,9 @@ export function DemoBar() {
           </Link>
 
           <Link
-            href="/p/minimal"
+            href="/minimal"
             className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full transition-all ${
-              pathname === "/p/minimal"
+              pathname === "/minimal"
                 ? "bg-emerald-500 text-black font-bold shadow-sm"
                 : "bg-white/10 hover:bg-white/20 text-neutral-300"
             }`}

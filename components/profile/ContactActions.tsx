@@ -1,21 +1,49 @@
 import React from "react";
 import { Phone, Mail, Globe, MapPin, MessageSquare } from "lucide-react";
-import { ProfileContact, ProfileLocation } from "@/types/profile";
-import { formatEmailUrl, formatMapsUrl, formatPhoneUrl, formatWhatsAppUrl, sanitizeUrl } from "@/lib/urls";
+import { ContactInfo, Location, ProfileSettings } from "@/types/profile";
+import {
+  formatEmailUrl,
+  formatMapsUrl,
+  formatPhoneUrl,
+  formatWhatsAppUrl,
+  sanitizeUrl,
+} from "@/lib/urls";
 
 interface ContactActionsProps {
-  contact?: ProfileContact;
-  location?: ProfileLocation;
+  contact?: ContactInfo;
+  location?: Location;
+  settings?: ProfileSettings;
 }
 
-export function ContactActions({ contact, location }: ContactActionsProps) {
+/**
+ * ContactActions (Server Component)
+ * Strictly honors both data presence AND settings toggle flags.
+ */
+export function ContactActions({
+  contact,
+  location,
+  settings,
+}: ContactActionsProps) {
   if (!contact) return null;
 
-  const whatsappUrl = contact.whatsapp ? formatWhatsAppUrl(contact.whatsapp) : "";
-  const phoneUrl = contact.phone ? formatPhoneUrl(contact.phone) : "";
-  const emailUrl = contact.email ? formatEmailUrl(contact.email) : "";
-  const websiteUrl = contact.website ? sanitizeUrl(contact.website) : "";
-  const mapsUrl = location ? formatMapsUrl(location) : "";
+  const showWhatsapp = settings?.showWhatsapp !== false;
+  const showPhone = settings?.showPhone !== false;
+  const showEmail = settings?.showEmail !== false;
+  const showWebsite = settings?.showWebsite !== false;
+  const showLocation = settings?.showLocation !== false;
+
+  const whatsappUrl =
+    showWhatsapp && contact.whatsapp
+      ? formatWhatsAppUrl(contact.whatsapp)
+      : "";
+  const phoneUrl =
+    showPhone && contact.phone ? formatPhoneUrl(contact.phone) : "";
+  const emailUrl =
+    showEmail && contact.email ? formatEmailUrl(contact.email) : "";
+  const websiteUrl =
+    showWebsite && contact.website ? sanitizeUrl(contact.website) : "";
+  const mapsUrl =
+    showLocation && location ? formatMapsUrl(location) : "";
 
   // Secondary actions list
   const secondaryActions = [
@@ -60,7 +88,7 @@ export function ContactActions({ contact, location }: ContactActionsProps) {
 
   return (
     <section aria-label="Quick Contact Actions" className="w-full space-y-2.5">
-      {/* Primary WhatsApp CTA if present */}
+      {/* Primary WhatsApp CTA if present and enabled */}
       {whatsappUrl && (
         <a
           href={whatsappUrl}

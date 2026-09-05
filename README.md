@@ -29,8 +29,8 @@ nfcabdo/
 │   ├── layout.tsx                # Root layout with Geist font & Viewport config
 │   ├── globals.css               # Theme engine & CSS custom properties
 │   ├── page.tsx                  # Root route: renders active client + showcase bar
-│   ├── p/[username]/page.tsx     # Dynamic route for Personal profiles (/p/amine)
-│   └── c/[slug]/page.tsx         # Dynamic route for Company profiles (/c/artex)
+│   ├── [slug]/page.tsx           # Dynamic clean root route (/amine, /artex)
+│   └── not-found.tsx             # Branded 404 page for unassigned NFC cards
 │
 ├── components/
 │   ├── DemoBar.tsx               # Top floating showcase switcher
@@ -92,16 +92,16 @@ npm run start
 
 ---
 
-## 🔄 Dynamic Routes & NFC URL Mapping
+## 🔄 Dynamic Clean Root Routes & NFC URL Mapping
 
-When programming physical NFC chips or QR codes, configure them to point to:
+When programming physical NFC chips or QR codes, configure them to point to clean root URLs without `/p/` or `/c/`:
 
 | Route | Example URL | Purpose |
 | :--- | :--- | :--- |
 | `/` | `https://yourdomain.com/` | Default active client configured in `data/client.ts` |
-| `/p/[username]` | `https://yourdomain.com/p/amine` | Personal profile for username `amine` |
-| `/c/[slug]` | `https://yourdomain.com/c/artex` | Company profile for agency slug `artex` |
-| `/p/minimal` | `https://yourdomain.com/p/minimal` | Minimal test profile (name + phone + Instagram only) |
+| `/[slug]` | `https://yourdomain.com/amine` | Personal profile for slug `amine` |
+| `/[slug]` | `https://yourdomain.com/artex` | Company profile for agency slug `artex` |
+| `/[slug]` | `https://yourdomain.com/minimal` | Minimal test profile (name + phone + Instagram only) |
 
 ---
 
@@ -248,9 +248,9 @@ When the user taps **"Save Contact to Phone"**:
 
 The system has been verified across all mandatory test scenarios:
 
-1. **Full Personal Profile**: Amine Belkacem (`/p/amine`) - all 13 sections populated.
-2. **Full Company Profile**: ARTEX Creative Agency (`/c/artex`) - all 13 sections populated with cover image & mission.
-3. **Minimal Profile**: Sara Nour (`/p/minimal`) - only Name, Phone, and Instagram. No empty cards or awkward spaces.
+1. **Full Personal Profile**: Amine Belkacem (`/amine`) - all 13 sections populated.
+2. **Full Company Profile**: ARTEX Creative Agency (`/artex`) - all 13 sections populated with cover image & mission.
+3. **Minimal Profile**: Sara Nour (`/minimal`) - only Name, Phone, and Instagram. No empty cards or awkward spaces.
 4. **No Projects**: Sections array is empty or `settings.showProjects: false` -> section omitted completely.
 5. **No Services**: Sections array is empty or `settings.showServices: false` -> section omitted completely.
 6. **No Social Media**: Social object is empty or `settings.showSocial: false` -> row omitted completely.

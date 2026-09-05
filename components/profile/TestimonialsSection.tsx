@@ -7,6 +7,9 @@ interface TestimonialsSectionProps {
   showTestimonials?: boolean;
 }
 
+/**
+ * TestimonialsSection (Server Component)
+ */
 export function TestimonialsSection({
   testimonials,
   showTestimonials = true,
@@ -30,34 +33,41 @@ export function TestimonialsSection({
       </div>
 
       <div className="space-y-3">
-        {testimonials.map((t, idx) => (
-          <div
-            key={`${t.author}-${idx}`}
-            className="p-4 sm:p-5 rounded-(--profile-radius) bg-(--profile-surface) border border-(--profile-border) shadow-sm space-y-3"
-          >
-            {/* Star Rating */}
-            <div className="flex items-center gap-1 text-amber-400">
-              {Array.from({ length: t.rating || 5 }).map((_, i) => (
-                <Star key={i} className="w-3.5 h-3.5 fill-current" />
-              ))}
-            </div>
+        {testimonials.map((t, idx) => {
+          const quoteText = t.text || t.quote || "";
+          const authorName = t.name || t.author || "Client";
 
-            {/* Quote */}
-            <p className="text-xs sm:text-sm text-(--profile-text)/90 leading-relaxed italic">
-              &ldquo;{t.quote}&rdquo;
-            </p>
+          if (!quoteText.trim()) return null;
 
-            {/* Author details */}
-            <div className="pt-1 border-t border-(--profile-border) flex items-center justify-between text-xs">
-              <span className="font-bold text-(--profile-text)">
-                {t.author}
-              </span>
-              <span className="text-(--profile-muted) truncate max-w-50">
-                {[t.role, t.company].filter(Boolean).join(" • ")}
-              </span>
+          return (
+            <div
+              key={`${authorName}-${idx}`}
+              className="p-4 sm:p-5 rounded-(--profile-radius) bg-(--profile-surface) border border-(--profile-border) shadow-sm space-y-3"
+            >
+              {/* Star Rating */}
+              <div className="flex items-center gap-1 text-amber-400">
+                {Array.from({ length: t.rating || 5 }).map((_, i) => (
+                  <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                ))}
+              </div>
+
+              {/* Quote */}
+              <p className="text-xs sm:text-sm text-(--profile-text)/90 leading-relaxed italic">
+                &ldquo;{quoteText}&rdquo;
+              </p>
+
+              {/* Author details */}
+              <div className="pt-1 border-t border-(--profile-border) flex items-center justify-between text-xs">
+                <span className="font-bold text-(--profile-text)">
+                  {authorName}
+                </span>
+                <span className="text-(--profile-muted) truncate max-w-50">
+                  {[t.role, t.company].filter(Boolean).join(" • ")}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

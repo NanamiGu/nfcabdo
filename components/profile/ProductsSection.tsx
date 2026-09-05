@@ -1,7 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
-import Image from "next/image";
+import React from "react";
 import { ShoppingBag, ArrowUpRight } from "lucide-react";
 import { Product } from "@/types/profile";
 import { sanitizeUrl } from "@/lib/urls";
@@ -11,7 +8,13 @@ interface ProductsSectionProps {
   showProducts?: boolean;
 }
 
-export function ProductsSection({ products, showProducts = true }: ProductsSectionProps) {
+/**
+ * ProductsSection (Server Component)
+ */
+export function ProductsSection({
+  products,
+  showProducts = true,
+}: ProductsSectionProps) {
   if (!showProducts || !products || products.length === 0) {
     return null;
   }
@@ -36,15 +39,17 @@ export function ProductsSection({ products, showProducts = true }: ProductsSecti
       <div className="grid gap-3 sm:grid-cols-1">
         {products.map((product, idx) => {
           const productUrl = product.url ? sanitizeUrl(product.url) : "";
+          const displayName = product.title || product.name || "Product";
+
           return (
             <div
-              key={`${product.title}-${idx}`}
+              key={`${displayName}-${idx}`}
               className="p-4 sm:p-5 rounded-(--profile-radius) bg-(--profile-surface) border border-(--profile-border) hover:border-(--profile-primary)/40 transition-all duration-200 shadow-sm flex flex-col justify-between gap-3"
             >
               <div className="space-y-1.5">
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-sm sm:text-base font-bold text-(--profile-text)">
-                    {product.title}
+                    {displayName}
                   </h3>
                   {product.badge && (
                     <span className="shrink-0 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-(--profile-primary) text-black">
@@ -72,7 +77,7 @@ export function ProductsSection({ products, showProducts = true }: ProductsSecti
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-(--profile-primary)/10 hover:bg-(--profile-primary)/20 text-(--profile-primary) border border-(--profile-primary)/30 transition-all"
-                    aria-label={`Get ${product.title}`}
+                    aria-label={`Get ${displayName}`}
                   >
                     <span>Get Access</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />

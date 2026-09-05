@@ -1,10 +1,8 @@
-"use client";
-
-import React, { useState } from "react";
-import Image from "next/image";
+import React from "react";
 import { FolderGit2, ExternalLink } from "lucide-react";
 import { Project } from "@/types/profile";
 import { sanitizeUrl } from "@/lib/urls";
+import { ProjectImage } from "./ProjectImage";
 
 interface ProjectsSectionProps {
   projects?: Project[];
@@ -12,40 +10,16 @@ interface ProjectsSectionProps {
 }
 
 function ProjectCard({ project }: { project: Project }) {
-  const [imageError, setImageError] = useState(false);
   const projectUrl = project.url ? sanitizeUrl(project.url) : "";
 
   return (
     <div className="group overflow-hidden rounded-(--profile-radius) bg-(--profile-surface) border border-(--profile-border) hover:border-(--profile-primary)/40 transition-all duration-200 shadow-sm flex flex-col">
-      {/* Project Thumbnail */}
-      {project.image && !imageError ? (
-        <div className="relative w-full aspect-video overflow-hidden bg-black/40">
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            loading="lazy"
-            sizes="(max-width: 768px) 100vw, 600px"
-            className="object-cover object-center group-hover:scale-105 transition-transform duration-300"
-            onError={() => setImageError(true)}
-          />
-          {project.category && (
-            <div className="absolute top-2.5 left-2.5">
-              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide bg-black/70 backdrop-blur-md text-white border border-white/10">
-                {project.category}
-              </span>
-            </div>
-          )}
-        </div>
-      ) : (
-        project.category && (
-          <div className="pt-4 px-4">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide bg-(--profile-primary)/10 text-(--profile-primary) border border-(--profile-primary)/20">
-              {project.category}
-            </span>
-          </div>
-        )
-      )}
+      {/* Project Thumbnail with graceful client-side fallback */}
+      <ProjectImage
+        image={project.image}
+        title={project.title}
+        category={project.category}
+      />
 
       {/* Project Content */}
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between gap-3">
@@ -77,7 +51,13 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
-export function ProjectsSection({ projects, showProjects = true }: ProjectsSectionProps) {
+/**
+ * ProjectsSection (Server Component)
+ */
+export function ProjectsSection({
+  projects,
+  showProjects = true,
+}: ProjectsSectionProps) {
   if (!showProjects || !projects || projects.length === 0) {
     return null;
   }

@@ -1,5 +1,7 @@
 export type ProfileType = "person" | "company";
 
+export type ProfileStatus = "active" | "inactive" | "draft";
+
 export interface Service {
   title: string;
   description: string;
@@ -18,7 +20,8 @@ export interface Project {
 }
 
 export interface Product {
-  title: string;
+  name?: string;
+  title?: string;
   description: string;
   price?: string;
   image?: string;
@@ -27,11 +30,13 @@ export interface Product {
 }
 
 export interface Testimonial {
-  quote: string;
-  author: string;
+  name?: string;
+  author?: string;
   role?: string;
   company?: string;
   avatar?: string;
+  text?: string;
+  quote?: string;
   rating?: number;
 }
 
@@ -58,14 +63,17 @@ export interface ProfileInfo {
   mission?: string;
 }
 
-export interface ProfileContact {
+export interface ContactInfo {
   phone?: string;
   whatsapp?: string;
   email?: string;
   website?: string;
 }
 
-export interface ProfileSocial {
+// Alias for backward compatibility
+export type ProfileContact = ContactInfo;
+
+export interface SocialLinks {
   instagram?: string;
   facebook?: string;
   linkedin?: string;
@@ -76,19 +84,28 @@ export interface ProfileSocial {
   github?: string;
 }
 
-export interface ProfileLocation {
+// Alias for backward compatibility
+export type ProfileSocial = SocialLinks;
+
+export interface Location {
   address?: string;
   city?: string;
   country?: string;
   googleMapsUrl?: string;
 }
 
-export interface ProfileBooking {
+// Alias for backward compatibility
+export type ProfileLocation = Location;
+
+export interface Booking {
   enabled: boolean;
   url?: string;
   title?: string;
   description?: string;
 }
+
+// Alias for backward compatibility
+export type ProfileBooking = Booking;
 
 export interface ProfileExtra {
   cvUrl?: string;
@@ -108,9 +125,13 @@ export interface ProfileSettings {
   showBooking: boolean;
   showLinks: boolean;
   showSaveContact: boolean;
+  showWebsite?: boolean;
+  showEmail?: boolean;
+  showPhone?: boolean;
+  showWhatsapp?: boolean;
 }
 
-export interface ProfileTheme {
+export interface Theme {
   mode: "light" | "dark";
   primaryColor: string;
   secondaryColor: string;
@@ -121,19 +142,37 @@ export interface ProfileTheme {
   borderRadius: "small" | "medium" | "large";
 }
 
-export interface Profile {
-  type: ProfileType;
+// Alias for backward compatibility
+export type ProfileTheme = Theme;
+
+interface BaseProfile {
+  id?: string;
+  slug?: string;
+  status?: ProfileStatus;
+  language?: string;
+  createdAt?: string;
+  updatedAt?: string;
   profile: ProfileInfo;
-  contact: ProfileContact;
-  social?: ProfileSocial;
-  location?: ProfileLocation;
+  contact: ContactInfo;
+  social?: SocialLinks;
+  location?: Location;
   services?: Service[];
   projects?: Project[];
   products?: Product[];
   testimonials?: Testimonial[];
   links?: ProfileLink[];
-  booking?: ProfileBooking;
+  booking?: Booking;
   extra?: ProfileExtra;
   settings: ProfileSettings;
-  theme: ProfileTheme;
+  theme: Theme;
 }
+
+export interface PersonProfile extends BaseProfile {
+  type: "person";
+}
+
+export interface CompanyProfile extends BaseProfile {
+  type: "company";
+}
+
+export type Profile = PersonProfile | CompanyProfile;
