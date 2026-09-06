@@ -20,6 +20,7 @@ import { SkillsManager } from "./SkillsManager";
 import { ResourcesManager } from "./ResourcesManager";
 import { saveProfileFullAction } from "@/app/admin/profiles/new/actions";
 import { updateProfileFullAction } from "@/app/admin/profiles/[id]/edit/actions";
+import { DeleteProfileButton } from "@/components/admin/DeleteProfileButton";
 import {
   User,
   Building2,
@@ -197,6 +198,16 @@ export function ProfileBuilder({ initialProfile, profileId }: ProfileBuilderProp
                 <span>Preview</span>
               </button>
             </div>
+
+            {/* Delete Button (when editing an existing profile) */}
+            {profileId && (
+              <DeleteProfileButton
+                profileId={profileId}
+                profileName={profile.profile?.name || profile.slug || "this profile"}
+                variant="header"
+                redirectOnDelete="/admin"
+              />
+            )}
 
             {/* Save Draft */}
             <button
@@ -1220,7 +1231,7 @@ export function ProfileBuilder({ initialProfile, profileId }: ProfileBuilderProp
 
           {/* RIGHT COLUMN: Realtime Live Phone Mockup Preview */}
           <div
-            className={`lg:col-span-5 flex justify-center ${
+            className={`lg:col-span-5 flex h-fit justify-center self-start lg:sticky lg:top-36 ${
               activeMobileTab === "edit" ? "hidden lg:flex" : "flex"
             }`}
           >

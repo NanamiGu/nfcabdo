@@ -120,6 +120,7 @@ export async function updateProfileFullAction(
     if (existingProfile.slug && existingProfile.slug !== normalizedSlug) {
       revalidatePath(`/${existingProfile.slug}`);
     }
+    revalidatePath("/");
 
     return { success: true, slug: normalizedSlug };
   } catch (err: unknown) {

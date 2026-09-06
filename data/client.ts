@@ -7,17 +7,55 @@ import type {
   ProfileUpdate,
 } from "@/types/database";
 
+const defaultProfileSettings = {
+  showAbout: true,
+  showServices: true,
+  showProjects: true,
+  showProducts: true,
+  showTestimonials: true,
+  showLocation: true,
+  showSocial: true,
+  showBooking: true,
+  showLinks: true,
+  showSaveContact: true,
+};
+
+const defaultProfileTheme = {
+  mode: "dark" as const,
+  primaryColor: "#38bdf8",
+  secondaryColor: "#818cf8",
+  backgroundColor: "#09090b",
+  surfaceColor: "#18181b",
+  textColor: "#fafafa",
+  mutedColor: "#a1a1aa",
+  borderRadius: "large" as const,
+};
+
 /**
  * Convert a Supabase database row into the application's Profile type.
  */
 function mapDatabaseProfile(row: ProfileRow): Profile {
+  const profileData = row.profile_data || {};
   const base = {
-    ...row.profile_data,
+    ...profileData,
     id: row.id,
     slug: row.slug,
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    profile: {
+      ...(profileData.profile || {}),
+      name: profileData.profile?.name || row.slug || "Unnamed Profile",
+    },
+    contact: profileData.contact || {},
+    settings: {
+      ...defaultProfileSettings,
+      ...(profileData.settings || {}),
+    },
+    theme: {
+      ...defaultProfileTheme,
+      ...(profileData.theme || {}),
+    },
   };
 
   return row.type === "company"
@@ -233,20 +271,32 @@ export async function updateProfile(
 /**
  * Delete a profile.
  *
- * This will later be restricted to Admin users through RLS/Auth.
+ * Restricted to Admin users through RLS/Auth.
  */
 export async function deleteProfile(id: string): Promise<boolean> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { error } = await supabase
-    .from("profiles")
-    .delete()
-    .eq("id", id);
+    const { data, error } = await supabase
+      .from("profiles")
+      .delete()
+      .eq("id", id)
+      .select("id");
 
-  if (error) {
-    console.error("Error deleting profile:", error);
+    if (error) {
+      console.error("Error deleting profile:", error);
+      return false;
+    }
+
+    if (!data || data.length === 0) {
+      console.warn("deleteProfile: No profile found or deleted for id:", id);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    if (isDynamicServerError(err)) throw err;
+    console.error("Database query error in deleteProfile:", err);
     return false;
   }
-
-  return true;
 }

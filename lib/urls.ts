@@ -65,15 +65,21 @@ export function formatMapsUrl(location?: ProfileLocation): string {
 
 /**
  * Sanitizes and ensures external URLs start with https:// or http://
- * Disallows dangerous pseudo-protocols (javascript:, vbscript:, data:)
+ * Disallows dangerous pseudo-protocols (javascript:, vbscript:, data:, blob:, file:)
+ * Preserves safe relative paths (/path).
  */
 export function sanitizeUrl(url?: string): string {
   if (!url) return "";
   const trimmed = url.trim();
   if (!trimmed) return "";
 
+  // Remove control characters and whitespace when testing protocol
+  const normalizedProtocol = trimmed
+    .replace(/[\u0000-\u001F\u007F-\u009F\s]/g, "")
+    .toLowerCase();
+
   // Neutralize dangerous pseudo-protocols
-  if (/^(javascript|vbscript|data):/i.test(trimmed)) {
+  if (/^(javascript|vbscript|data|blob|file):/i.test(normalizedProtocol)) {
     return "";
   }
 
@@ -83,6 +89,11 @@ export function sanitizeUrl(url?: string): string {
 
   if (trimmed.startsWith("//")) {
     return `https:${trimmed}`;
+  }
+
+  // Safe relative paths
+  if (trimmed.startsWith("/") && !trimmed.startsWith("//")) {
+    return trimmed;
   }
 
   return `https://${trimmed}`;

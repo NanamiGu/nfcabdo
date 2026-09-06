@@ -116,6 +116,7 @@ export async function saveProfileFullAction(
 
     revalidatePath("/admin");
     revalidatePath(`/${normalizedSlug}`);
+    revalidatePath("/");
 
     return {
       success: true,

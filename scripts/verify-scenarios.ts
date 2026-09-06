@@ -14,6 +14,7 @@ import {
   getBorderRadiusValue,
   cn,
 } from "../lib/utils.ts";
+import { getThemeStyles } from "../lib/theme.ts";
 import type { Profile } from "../types/profile.ts";
 
 console.log("=== RUNNING NFC PROFILE VERIFICATION TEST SUITE ===\n");
@@ -72,6 +73,10 @@ assert(sanitizeUrl("//evil.com") === "https://evil.com", "sanitizeUrl prevents p
 assert(sanitizeUrl("javascript:alert(1)") === "", "sanitizeUrl neutralizes javascript: XSS");
 assert(sanitizeUrl("data:text/html,<script>") === "", "sanitizeUrl neutralizes data: URI");
 assert(sanitizeUrl("vbscript:msgbox(1)") === "", "sanitizeUrl neutralizes vbscript:");
+assert(sanitizeUrl("blob:https://evil.com") === "", "sanitizeUrl neutralizes blob: URI");
+assert(sanitizeUrl("file:///etc/passwd") === "", "sanitizeUrl neutralizes file: URI");
+assert(sanitizeUrl("javascript :alert(1)") === "", "sanitizeUrl neutralizes whitespace-obfuscated javascript:");
+assert(sanitizeUrl("/relative-path") === "/relative-path", "sanitizeUrl allows relative path");
 assert(sanitizeUrl("") === "", "sanitizeUrl with empty string");
 assert(sanitizeUrl(undefined) === "", "sanitizeUrl with undefined");
 
@@ -96,11 +101,13 @@ assert(!hasAnySocial(undefined), "hasAnySocial with undefined");
 // 9. ClassNames helper (cn)
 assert(cn("px-4", false && "hidden", undefined, "py-2") === "px-4 py-2", "cn merges classes");
 
-// 10. Border radius helper
+// 10. Border radius helper & Theme styles fallback
 assert(getBorderRadiusValue("small") === "0.5rem", "getBorderRadiusValue small");
 assert(getBorderRadiusValue("medium") === "0.875rem", "getBorderRadiusValue medium");
 assert(getBorderRadiusValue("large") === "1.25rem", "getBorderRadiusValue large");
 assert(getBorderRadiusValue(undefined) === "1.25rem", "getBorderRadiusValue default");
+const fallbackStyles = getThemeStyles(undefined);
+assert(Boolean(fallbackStyles["--profile-primary" as unknown as keyof typeof fallbackStyles]), "getThemeStyles handles undefined safely");
 
 // 11. Reserved slugs validation
 assert(RESERVED_SLUGS.has("admin"), "RESERVED_SLUGS includes admin");

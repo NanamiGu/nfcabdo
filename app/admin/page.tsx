@@ -12,6 +12,7 @@ import {
   CreditCard,
   Pencil,
 } from "lucide-react";
+import { DeleteProfileButton } from "@/components/admin/DeleteProfileButton";
 
 export const dynamic = "force-dynamic";
 
@@ -218,7 +219,7 @@ export default async function AdminPage() {
                     </span>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       {profile.id && (
                         <Link
                           href={`/admin/profiles/${profile.id}/edit`}
@@ -239,6 +240,13 @@ export default async function AdminPage() {
                           <span>View</span>
                           <ExternalLink className="h-3.5 w-3.5 text-slate-400" />
                         </Link>
+                      )}
+
+                      {profile.id && (
+                        <DeleteProfileButton
+                          profileId={profile.id}
+                          profileName={profile.profile?.name || profile.slug || "this profile"}
+                        />
                       )}
                     </div>
                   </div>

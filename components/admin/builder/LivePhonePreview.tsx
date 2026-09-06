@@ -19,7 +19,7 @@ export function LivePhonePreview({ profile }: LivePhonePreviewProps) {
   };
 
   return (
-    <div className="flex flex-col items-center sticky top-6">
+    <div className="flex flex-col items-center self-start">
       {/* Phone header toolbar */}
       <div className="w-full max-w-97.5 mb-3 flex items-center justify-between px-2 text-xs text-slate-500 font-medium">
         <div className="flex items-center gap-1.5">
