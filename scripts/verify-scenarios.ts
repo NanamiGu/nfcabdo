@@ -6,6 +6,7 @@ import {
   formatMapsUrl,
   sanitizeUrl,
   RESERVED_SLUGS,
+  normalizeSlug,
 } from "../lib/urls.ts";
 import {
   hasAnyContact,
@@ -114,7 +115,13 @@ assert(RESERVED_SLUGS.has("admin"), "RESERVED_SLUGS includes admin");
 assert(RESERVED_SLUGS.has("api"), "RESERVED_SLUGS includes api");
 assert(RESERVED_SLUGS.has("login"), "RESERVED_SLUGS includes login");
 
-// 12. vCard 3.0 Generation - Person Profile
+// 12. Slug normalization tests
+assert(normalizeSlug("John Doe") === "john-doe", "normalizeSlug handles spaces");
+assert(normalizeSlug("  ARTEX Studio! ") === "artex-studio", "normalizeSlug strips special characters and trims");
+assert(normalizeSlug("multiple---hyphens") === "multiple-hyphens", "normalizeSlug collapses hyphens");
+assert(normalizeSlug("") === "", "normalizeSlug handles empty string");
+
+// 13. vCard 3.0 Generation - Person Profile
 const testPerson: Profile = {
   type: "person",
   profile: {

@@ -16,6 +16,22 @@ export const RESERVED_SLUGS = new Set([
 ]);
 
 /**
+ * Normalizes a user-entered slug for URL compatibility.
+ * Lowercases, replaces spaces with hyphens, strips invalid characters,
+ * collapses consecutive hyphens, and trims leading/trailing hyphens.
+ */
+export function normalizeSlug(rawSlug: string): string {
+  if (!rawSlug || typeof rawSlug !== "string") return "";
+  return rawSlug
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-_]/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/**
  * Normalizes a phone number for WhatsApp link (wa.me)
  * Strips all non-digit characters (+, spaces, hyphens, parentheses).
  */

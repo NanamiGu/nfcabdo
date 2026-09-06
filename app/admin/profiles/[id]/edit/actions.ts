@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { updateProfile, getProfileById } from "@/data/client";
 import { createClient } from "@/lib/supabase/server";
-import { RESERVED_SLUGS } from "@/lib/urls";
+import { RESERVED_SLUGS, normalizeSlug } from "@/lib/urls";
 import type { ProfileUpdate } from "@/types/database";
 import type { Profile, ProfileType, ProfileStatus } from "@/types/profile";
 
@@ -42,13 +42,7 @@ export async function updateProfileFullAction(
       return { success: false, error: "Name is required." };
     }
 
-    const normalizedSlug = rawSlug
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-_]/g, "")
-      .replace(/-+/g, "-")
-      .replace(/^-+|-+$/g, "");
+    const normalizedSlug = normalizeSlug(rawSlug);
 
     if (!normalizedSlug) {
       return { success: false, error: "Invalid slug." };

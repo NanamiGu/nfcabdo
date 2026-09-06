@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createProfile } from "@/data/client";
 import { createClient } from "@/lib/supabase/server";
-import { RESERVED_SLUGS } from "@/lib/urls";
+import { RESERVED_SLUGS, normalizeSlug } from "@/lib/urls";
 import type { ProfileInsert } from "@/types/database";
 import type { Profile } from "@/types/profile";
 
@@ -38,13 +38,7 @@ export async function saveProfileFullAction(
       };
     }
 
-    const normalizedSlug = rawSlug
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-_]/g, "")
-      .replace(/-+/g, "-")
-      .replace(/^-+|-+$/g, "");
+    const normalizedSlug = normalizeSlug(rawSlug);
 
     if (!normalizedSlug) {
       return {
@@ -158,13 +152,7 @@ export async function createProfileAction(
     return { error: "Slug is required." };
   }
 
-  const normalizedSlug = slug
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-_]/g, "")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  const normalizedSlug = normalizeSlug(slug);
 
   const result = await saveProfileFullAction(
     {
