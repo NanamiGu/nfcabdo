@@ -66,7 +66,12 @@ function mapDatabaseProfile(row: ProfileRow): Profile {
 function isDynamicServerError(err: unknown): boolean {
   if (typeof err === "object" && err !== null && "digest" in err) {
     const digest = (err as { digest?: unknown }).digest;
-    return typeof digest === "string" && digest.startsWith("DYNAMIC_SERVER_USAGE");
+    return (
+      typeof digest === "string" &&
+      (digest.startsWith("DYNAMIC_SERVER_USAGE") ||
+        digest.startsWith("NEXT_REDIRECT") ||
+        digest.startsWith("NEXT_NOT_FOUND"))
+    );
   }
   return false;
 }

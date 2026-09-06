@@ -33,9 +33,12 @@ function LoginForm() {
     }
 
     const rawRedirect = searchParams.get("redirect");
-    // Validate redirect is a safe internal relative path (no open redirect)
+    // Validate redirect is a safe internal relative path (no open redirect / backslash bypass)
     const destination =
-      rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      rawRedirect &&
+      rawRedirect.startsWith("/") &&
+      !rawRedirect.startsWith("//") &&
+      !rawRedirect.includes("\\")
         ? rawRedirect
         : "/admin";
 

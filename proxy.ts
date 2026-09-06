@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { cancelTabExit } from "@/lib/supabase/admin-session";
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
@@ -42,6 +43,11 @@ export async function proxy(request: NextRequest) {
 
     const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
     const isLoginPage = request.nextUrl.pathname === "/admin/login";
+
+    if (isAdminRoute && !isLoginPage && user) {
+      // Admin is active or refreshed an admin page; cancel any scheduled tab exit
+      cancelTabExit();
+    }
 
     if (isAdminRoute && !isLoginPage && !user) {
       const url = request.nextUrl.clone();

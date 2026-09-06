@@ -12,6 +12,20 @@ export function AdminSignOutButton() {
   const handleSignOut = async () => {
     try {
       setLoading(true);
+
+      if (typeof window !== "undefined") {
+        const tabId = sessionStorage.getItem("nfc_admin_tab_id");
+        sessionStorage.removeItem("nfc_admin_session_active");
+        sessionStorage.removeItem("nfc_admin_tab_id");
+        sessionStorage.removeItem("nfc_admin_is_reloading");
+
+        if (tabId && navigator.sendBeacon) {
+          const payload = JSON.stringify({ tabId });
+          const blob = new Blob([payload], { type: "application/json" });
+          navigator.sendBeacon("/api/admin/logout", blob);
+        }
+      }
+
       const supabase = createClient();
       await supabase.auth.signOut();
       router.push("/admin/login");

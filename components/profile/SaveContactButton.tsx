@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UserPlus, Check, ArrowDownToLine } from "lucide-react";
 import { Profile } from "@/types/profile";
 import { downloadVCard } from "@/lib/vcard";
@@ -12,6 +12,12 @@ interface SaveContactButtonProps {
 export function SaveContactButton({ profile }: SaveContactButtonProps) {
   const [saved, setSaved] = useState(false);
 
+  useEffect(() => {
+    if (!saved) return;
+    const timer = setTimeout(() => setSaved(false), 2500);
+    return () => clearTimeout(timer);
+  }, [saved]);
+
   if (profile.settings.showSaveContact === false) {
     return null;
   }
@@ -20,7 +26,6 @@ export function SaveContactButton({ profile }: SaveContactButtonProps) {
     try {
       downloadVCard(profile);
       setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
     } catch (err) {
       console.error("Failed to generate or download contact vCard:", err);
     }

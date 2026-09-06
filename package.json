@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types scripts/verify-scenarios.ts"
+    "test": "node --experimental-strip-types scripts/verify-scenarios.ts && node --experimental-strip-types scripts/verify-admin-session-lifecycle.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.6",

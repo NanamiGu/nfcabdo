@@ -16,17 +16,7 @@ export const profileRegistry: Record<string, Profile> = {
   minimal: minimalProfile,
 };
 
-const RESERVED_SLUGS = new Set([
-  "api",
-  "_next",
-  "static",
-  "favicon.ico",
-  "robots.txt",
-  "sitemap.xml",
-  "images",
-  "avatars",
-  "icons",
-]);
+import { RESERVED_SLUGS } from "@/lib/urls";
 
 /**
  * Resolve a profile by identifier and optional expected type.
