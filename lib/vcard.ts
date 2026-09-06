@@ -1,4 +1,4 @@
-import { Profile } from "@/types/profile";
+import type { Profile } from "@/types/profile";
 
 /**
  * Escapes characters for vCard 3.0 formatting.
@@ -46,12 +46,12 @@ export function generateVCard(profile: Profile): string {
 
   // Phone numbers
   if (contact.phone) {
-    const cleanPhone = contact.phone.trim();
+    const cleanPhone = contact.phone.replace(/[^\d+]/g, "").trim() || contact.phone.trim();
     lines.push(`TEL;TYPE=CELL,VOICE:${cleanPhone}`);
   }
 
   if (contact.whatsapp && contact.whatsapp !== contact.phone) {
-    const cleanWhatsApp = contact.whatsapp.trim();
+    const cleanWhatsApp = contact.whatsapp.replace(/[^\d+]/g, "").trim() || contact.whatsapp.trim();
     lines.push(`TEL;TYPE=MSG,VOICE:${cleanWhatsApp}`);
   }
 

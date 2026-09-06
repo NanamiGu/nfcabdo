@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createProfile } from "@/data/client";
 import { createClient } from "@/lib/supabase/server";
+import { RESERVED_SLUGS } from "@/lib/urls";
 import type { ProfileInsert } from "@/types/database";
 import type { Profile } from "@/types/profile";
 
@@ -52,7 +53,26 @@ export async function saveProfileFullAction(
       };
     }
 
+    if (RESERVED_SLUGS.has(normalizedSlug)) {
+      return {
+        success: false,
+        error: `The URL slug "${normalizedSlug}" is reserved for system routes. Please choose a different slug.`,
+      };
+    }
+
     const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "Unauthorized: You must be logged in as an administrator to save profiles.",
+      };
+    }
 
     // Check slug uniqueness before insert
     const { data: existing } = await supabase
@@ -68,17 +88,7 @@ export async function saveProfileFullAction(
       };
     }
 
-    let createdBy: string | null = null;
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user?.id) {
-        createdBy = user.id;
-      }
-    } catch {
-      // Proceed without user if auth is optional/unconfigured
-    }
+    const createdBy = user.id;
 
     // Assemble complete profile payload
     const fullProfileData: Profile = {

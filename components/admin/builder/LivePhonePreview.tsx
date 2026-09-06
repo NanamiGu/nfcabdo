@@ -3,17 +3,14 @@
 import React, { useState } from "react";
 import { Profile } from "@/types/profile";
 import { ProfilePage } from "@/components/profile/ProfilePage";
-import { Smartphone, RotateCcw, ExternalLink, Sparkles } from "lucide-react";
+import { Smartphone, RotateCcw } from "lucide-react";
 
 interface LivePhonePreviewProps {
   profile: Profile;
 }
 
 export function LivePhonePreview({ profile }: LivePhonePreviewProps) {
-  const [currentTime] = useState(() => {
-    const now = new Date();
-    return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  });
+  const currentTime = "9:41";
 
   const [previewKey, setPreviewKey] = useState(0);
 
@@ -46,7 +43,7 @@ export function LivePhonePreview({ profile }: LivePhonePreviewProps) {
       </div>
 
       {/* Realistic Smartphone Mockup Chassis */}
-      <div className="relative w-[340px] sm:w-[380px] h-[720px] rounded-[48px] bg-slate-950 p-3 shadow-2xl ring-1 ring-slate-800/80 transition-all duration-300">
+      <div className="relative w-85 sm:w-95 h-180 rounded-[48px] bg-slate-950 p-3 shadow-2xl ring-1 ring-slate-800/80 transition-all duration-300">
         {/* Outer Phone Bezel & Reflection Highlights */}
         <div className="absolute inset-0 rounded-[48px] pointer-events-none border border-slate-700/40 shadow-inner" />
 

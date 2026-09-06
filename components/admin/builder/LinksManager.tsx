@@ -10,8 +10,6 @@ import {
   EyeOff,
   ArrowUp,
   ArrowDown,
-  Link2,
-  ExternalLink,
   Sparkles,
 } from "lucide-react";
 

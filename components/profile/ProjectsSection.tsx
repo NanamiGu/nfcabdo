@@ -23,7 +23,7 @@ interface ProjectsSectionProps {
 
 function ProjectCard({ project }: { project: Project }) {
   const projectUrl = project.url ? sanitizeUrl(project.url) : "";
-  const githubUrl = project.github ? sanitizeUrl(project.github) : "";
+  const githubUrl = project.githubUrl || project.github ? sanitizeUrl(project.githubUrl || project.github || "") : "";
 
   return (
     <div className="group overflow-hidden rounded-(--profile-radius) bg-(--profile-surface) border border-(--profile-border) hover:border-(--profile-primary)/40 transition-all duration-200 shadow-sm flex flex-col">

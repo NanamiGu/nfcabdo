@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Profile, ProfileType, ProfileStatus } from "@/types/profile";
+import { Profile, ProfileType } from "@/types/profile";
 import { getDefaultProfile, SOCIAL_PLATFORMS } from "./types";
 import { LivePhonePreview } from "./LivePhonePreview";
 import { SectionAccordion } from "./SectionAccordion";
@@ -37,10 +37,7 @@ import {
   Download,
   MapPin,
   Calendar,
-  Eye,
-  EyeOff,
   Palette,
-  Layers,
   ArrowLeft,
   Save,
   Send,
@@ -49,7 +46,6 @@ import {
   CheckCircle2,
   Smartphone,
   Sliders,
-  Check,
 } from "lucide-react";
 
 interface ProfileBuilderProps {

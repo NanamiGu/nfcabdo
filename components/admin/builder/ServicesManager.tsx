@@ -10,9 +10,7 @@ import {
   EyeOff,
   ArrowUp,
   ArrowDown,
-  Check,
   X,
-  Briefcase,
 } from "lucide-react";
 
 interface ServicesManagerProps {

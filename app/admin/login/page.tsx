@@ -1,11 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { createClient } from "../../../lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { FormEvent, useState, Suspense } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function AdminLoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,13 +32,19 @@ export default function AdminLoginPage() {
       return;
     }
 
-    router.push("/admin");
+    const rawRedirect = searchParams.get("redirect");
+    // Validate redirect is a safe internal relative path (no open redirect)
+    const destination =
+      rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+        ? rawRedirect
+        : "/admin";
+
+    router.push(destination);
     router.refresh();
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
+    <div className="w-full max-w-md">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">
             Admin Login
@@ -111,6 +118,15 @@ export default function AdminLoginPage() {
           </button>
         </form>
       </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <main className="min-h-screen flex items-center justify-center p-6">
+      <Suspense fallback={<div className="text-sm text-slate-500">Loading login...</div>}>
+        <LoginForm />
+      </Suspense>
     </main>
   );
 }

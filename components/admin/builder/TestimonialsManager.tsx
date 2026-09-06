@@ -11,7 +11,6 @@ import {
   ArrowUp,
   ArrowDown,
   Star,
-  Quote,
 } from "lucide-react";
 import { ImageUploadField } from "./ImageUploadField";
 

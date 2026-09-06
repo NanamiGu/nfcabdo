@@ -1,6 +1,7 @@
 import React from "react";
 import { Briefcase, Building2, MapPin, Calendar, ExternalLink } from "lucide-react";
 import { Experience } from "@/types/profile";
+import { sanitizeUrl } from "@/lib/urls";
 
 interface ExperienceSectionProps {
   experience?: Experience[];
@@ -85,7 +86,7 @@ export function ExperienceSection({
 
                 {item.url && (
                   <a
-                    href={item.url}
+                    href={sanitizeUrl(item.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="shrink-0 p-1.5 rounded-lg text-(--profile-muted) hover:text-(--profile-text) hover:bg-(--profile-bg) transition-colors"

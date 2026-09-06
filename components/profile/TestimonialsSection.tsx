@@ -54,7 +54,7 @@ export function TestimonialsSection({
             >
               {/* Star Rating */}
               <div className="flex items-center gap-1 text-amber-400">
-                {Array.from({ length: t.rating || 5 }).map((_, i) => (
+                {Array.from({ length: Math.max(1, Math.min(5, Math.round(Number(t.rating) || 5))) }).map((_, i) => (
                   <Star key={i} className="w-3.5 h-3.5 fill-current" />
                 ))}
               </div>

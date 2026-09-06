@@ -3,7 +3,7 @@
 import React from "react";
 import { Theme } from "@/types/profile";
 import { THEME_COLOR_PRESETS } from "./types";
-import { Palette, Sun, Moon, Check } from "lucide-react";
+import { Sun, Moon, Check } from "lucide-react";
 
 interface ThemeSelectorProps {
   theme: Theme;

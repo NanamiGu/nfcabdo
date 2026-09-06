@@ -1,5 +1,6 @@
 import { Profile } from "@/types/profile";
 import { createClient } from "../lib/supabase/server";
+import { getProfileFromRegistry } from "./registry";
 import type {
   ProfileRow,
   ProfileInsert,
@@ -24,6 +25,14 @@ function mapDatabaseProfile(row: ProfileRow): Profile {
     : { ...base, type: "person" };
 }
 
+function isDynamicServerError(err: unknown): boolean {
+  if (typeof err === "object" && err !== null && "digest" in err) {
+    const digest = (err as { digest?: unknown }).digest;
+    return typeof digest === "string" && digest.startsWith("DYNAMIC_SERVER_USAGE");
+  }
+  return false;
+}
+
 /**
  * Get a profile by its slug.
  *
@@ -31,38 +40,42 @@ function mapDatabaseProfile(row: ProfileRow): Profile {
  * /artex
  * -> slug = "artex"
  *
- * Only active profiles are publicly accessible.
+ * Checks database first, then falls back to local registry.
  */
 export async function getProfileBySlug(
   slug: string,
   expectedType?: "person" | "company"
 ): Promise<Profile | null> {
-  const supabase = await createClient();
+  const normalizedSlug = slug.trim().toLowerCase();
 
-  let query = supabase
-    .from("profiles")
-    .select(
-      "id, slug, type, status, profile_data, created_by, created_at, updated_at"
-    )
-    .eq("slug", slug)
-    .eq("status", "active");
+  try {
+    const supabase = await createClient();
 
-  if (expectedType) {
-    query = query.eq("type", expectedType);
+    let query = supabase
+      .from("profiles")
+      .select(
+        "id, slug, type, status, profile_data, created_by, created_at, updated_at"
+      )
+      .eq("slug", normalizedSlug)
+      .eq("status", "active");
+
+    if (expectedType) {
+      query = query.eq("type", expectedType);
+    }
+
+    const { data, error } = await query.maybeSingle();
+
+    if (error) {
+      console.error("Error fetching profile from database:", error);
+    } else if (data) {
+      return mapDatabaseProfile(data);
+    }
+  } catch (err) {
+    if (isDynamicServerError(err)) throw err;
+    console.error("Database query error in getProfileBySlug:", err);
   }
 
-  const { data, error } = await query.maybeSingle();
-
-  if (error) {
-    console.error("Error fetching profile:", error);
-    return null;
-  }
-
-  if (!data) {
-    return null;
-  }
-
-  return mapDatabaseProfile(data);
+  return getProfileFromRegistry(normalizedSlug, expectedType);
 }
 
 /**
@@ -71,57 +84,66 @@ export async function getProfileBySlug(
  * Used by the Admin Dashboard for editing profiles of any status.
  */
 export async function getProfileById(id: string): Promise<Profile | null> {
-  const supabase = await createClient();
+  if (!id || typeof id !== "string") return null;
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(
-      "id, slug, type, status, profile_data, created_by, created_at, updated_at"
-    )
-    .eq("id", id)
-    .maybeSingle();
+  try {
+    const supabase = await createClient();
 
-  if (error) {
-    console.error("Error fetching profile by ID:", error);
-    return null;
+    const { data, error } = await supabase
+      .from("profiles")
+      .select(
+        "id, slug, type, status, profile_data, created_by, created_at, updated_at"
+      )
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching profile by ID:", error);
+    } else if (data) {
+      return mapDatabaseProfile(data);
+    }
+  } catch (err) {
+    if (isDynamicServerError(err)) throw err;
+    console.error("Database query error in getProfileById:", err);
   }
 
-  if (!data) {
-    return null;
-  }
+  if (id === "prof_artex_01") return getProfileFromRegistry("artex");
+  if (id === "prof_amine_01") return getProfileFromRegistry("amine");
+  if (id === "prof_minimal_01") return getProfileFromRegistry("minimal");
 
-  return mapDatabaseProfile(data);
+  return null;
 }
 
 /**
  * Get the active profile used by the root NFC page.
  *
- * NOTE:
- * This is mainly useful for the current root/demo page.
- * The production customer pages should use /[slug].
+ * Queries latest active profile from database, or falls back to demo profile.
  */
 export async function getActiveProfile(): Promise<Profile | null> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(
-      "id, slug, type, status, profile_data, created_by, created_at, updated_at"
-    )
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
+    const { data, error } = await supabase
+      .from("profiles")
+      .select(
+        "id, slug, type, status, profile_data, created_by, created_at, updated_at"
+      )
+      .eq("status", "active")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  if (error) {
-    console.error("Error fetching active profile:", error);
-    return null;
+    if (error) {
+      console.error("Error fetching active profile:", error);
+    } else if (data) {
+      return mapDatabaseProfile(data);
+    }
+  } catch (err) {
+    if (isDynamicServerError(err)) throw err;
+    console.error("Database query error in getActiveProfile:", err);
   }
 
-  if (!data) {
-    return null;
-  }
-
-  return mapDatabaseProfile(data);
+  return getProfileFromRegistry("artex") || getProfileFromRegistry("amine");
 }
 
 /**
@@ -131,21 +153,27 @@ export async function getActiveProfile(): Promise<Profile | null> {
  * It should NOT be used directly by public profile pages.
  */
 export async function getProfiles(): Promise<Profile[]> {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select(
-      "id, slug, type, status, profile_data, created_by, created_at, updated_at"
-    )
-    .order("created_at", { ascending: false });
+    const { data, error } = await supabase
+      .from("profiles")
+      .select(
+        "id, slug, type, status, profile_data, created_by, created_at, updated_at"
+      )
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching profiles:", error);
+    if (error) {
+      console.error("Error fetching profiles:", error);
+      return [];
+    }
+
+    return data.map((row) => mapDatabaseProfile(row));
+  } catch (err) {
+    if (isDynamicServerError(err)) throw err;
+    console.error("Failed to fetch profiles in getProfiles:", err);
     return [];
   }
-
-  return data.map((row) => mapDatabaseProfile(row));
 }
 
 /**

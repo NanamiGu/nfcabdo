@@ -50,6 +50,7 @@ const iconMap: Record<string, React.FC<LucideProps>> = {
   share: Share2,
   "file-text": FileText,
   "book-open": BookOpen,
+  play: PlayCircle,
   "play-circle": PlayCircle,
   "shopping-bag": ShoppingBag,
 };

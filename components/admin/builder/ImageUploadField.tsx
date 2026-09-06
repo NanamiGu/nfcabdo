@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Upload, X, Loader2, Image as ImageIcon, Link as LinkIcon, RefreshCw } from "lucide-react";
+import { Upload, X, Loader2, Link as LinkIcon, RefreshCw } from "lucide-react";
 import { uploadProfileMedia } from "@/lib/supabase/storage";
 
 interface ImageUploadFieldProps {

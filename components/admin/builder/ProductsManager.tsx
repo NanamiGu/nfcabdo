@@ -10,7 +10,6 @@ import {
   EyeOff,
   ArrowUp,
   ArrowDown,
-  ShoppingBag,
 } from "lucide-react";
 import { ImageUploadField } from "./ImageUploadField";
 

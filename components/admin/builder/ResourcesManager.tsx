@@ -11,9 +11,7 @@ import {
   ArrowUp,
   ArrowDown,
   FileText,
-  Download,
 } from "lucide-react";
-import { ImageUploadField } from "./ImageUploadField";
 
 interface ResourcesManagerProps {
   resources: ResourceItem[];

@@ -1,4 +1,19 @@
-import { ProfileLocation } from "@/types/profile";
+import type { ProfileLocation } from "@/types/profile";
+
+export const RESERVED_SLUGS = new Set([
+  "admin",
+  "api",
+  "login",
+  "_next",
+  "static",
+  "favicon.ico",
+  "robots.txt",
+  "sitemap.xml",
+  "images",
+  "avatars",
+  "icons",
+  "profiles",
+]);
 
 /**
  * Normalizes a phone number for WhatsApp link (wa.me)
@@ -50,13 +65,25 @@ export function formatMapsUrl(location?: ProfileLocation): string {
 
 /**
  * Sanitizes and ensures external URLs start with https:// or http://
+ * Disallows dangerous pseudo-protocols (javascript:, vbscript:, data:)
  */
 export function sanitizeUrl(url?: string): string {
   if (!url) return "";
   const trimmed = url.trim();
   if (!trimmed) return "";
+
+  // Neutralize dangerous pseudo-protocols
+  if (/^(javascript|vbscript|data):/i.test(trimmed)) {
+    return "";
+  }
+
   if (/^https?:\/\//i.test(trimmed)) {
     return trimmed;
   }
+
+  if (trimmed.startsWith("//")) {
+    return `https:${trimmed}`;
+  }
+
   return `https://${trimmed}`;
 }

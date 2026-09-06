@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { updateProfile, getProfileById } from "@/data/client";
 import { createClient } from "@/lib/supabase/server";
+import { RESERVED_SLUGS } from "@/lib/urls";
 import type { ProfileUpdate } from "@/types/database";
 import type { Profile, ProfileType, ProfileStatus } from "@/types/profile";
 
@@ -53,8 +54,28 @@ export async function updateProfileFullAction(
       return { success: false, error: "Invalid slug." };
     }
 
-    // Check slug uniqueness against OTHER profiles
+    if (RESERVED_SLUGS.has(normalizedSlug)) {
+      return {
+        success: false,
+        error: `The URL slug "${normalizedSlug}" is reserved for system routes. Please choose a different slug.`,
+      };
+    }
+
     const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return {
+        success: false,
+        error: "Unauthorized: You must be logged in as an administrator to update profiles.",
+      };
+    }
+
+    // Check slug uniqueness against OTHER profiles
     const { data: conflict } = await supabase
       .from("profiles")
       .select("id")

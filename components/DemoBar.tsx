@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, Building2, User, ChevronDown, ChevronUp, Eye } from "lucide-react";
+import { Building2, User, Eye } from "lucide-react";
 
 export function DemoBar() {
-  const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
 
   return (

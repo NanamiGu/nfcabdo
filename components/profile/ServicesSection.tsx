@@ -42,7 +42,7 @@ export function ServicesSection({
 
       <div className="grid gap-3 sm:grid-cols-1">
         {visibleServices.map((service, index) => {
-          const ctaUrl = service.ctaUrl ? sanitizeUrl(service.ctaUrl) : "";
+          const ctaUrl = service.ctaUrl || service.url ? sanitizeUrl(service.ctaUrl || service.url || "") : "";
 
           return (
             <div

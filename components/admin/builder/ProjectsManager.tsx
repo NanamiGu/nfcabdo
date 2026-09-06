@@ -10,8 +10,6 @@ import {
   EyeOff,
   ArrowUp,
   ArrowDown,
-  ExternalLink,
-  FolderGit2,
 } from "lucide-react";
 import { ImageUploadField } from "./ImageUploadField";
 

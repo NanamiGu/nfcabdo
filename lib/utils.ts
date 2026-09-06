@@ -1,4 +1,4 @@
-import { ProfileContact, ProfileSocial } from "@/types/profile";
+import type { ProfileContact, ProfileSocial } from "@/types/profile";
 
 /**
  * Combines conditional class names cleanly

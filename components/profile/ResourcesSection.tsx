@@ -40,7 +40,7 @@ export function ResourcesSection({
 
       <div className="space-y-2.5">
         {visibleItems.map((item, idx) => {
-          const fileUrl = sanitizeUrl(item.fileUrl);
+          const fileUrl = sanitizeUrl(item.fileUrl || item.url);
 
           return (
             <a

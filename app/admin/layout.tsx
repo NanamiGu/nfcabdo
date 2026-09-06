@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Layers, ExternalLink } from "lucide-react";
+import { AdminSignOutButton } from "@/components/admin/AdminSignOutButton";
 
 export const metadata: Metadata = {
   title: "NFC Studio | Admin Dashboard",
@@ -34,7 +35,7 @@ export default function AdminLayout({
             </div>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <Link
               href="/"
               target="_blank"
@@ -44,6 +45,8 @@ export default function AdminLayout({
               <span>Live Card Demo</span>
               <ExternalLink className="h-3.5 w-3.5" />
             </Link>
+
+            <AdminSignOutButton />
           </div>
         </div>
       </header>
