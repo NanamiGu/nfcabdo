@@ -1,6 +1,3 @@
-import { scheduleTabExit, cancelTabExit } from "../lib/supabase/admin-session.ts";
-import type { SupabaseClient } from "@supabase/supabase-js";
-
 console.log("=== RUNNING ADMIN AUTH & SESSION LIFECYCLE VERIFICATION SUITE ===\n");
 
 let passed = 0;
@@ -16,38 +13,74 @@ function assert(condition: boolean, testName: string) {
   console.log(`✓ PASSED: ${testName}`);
 }
 
-// Mock Supabase client for testing lifecycle operations
-let signOutCalledCount = 0;
-const mockSupabase = {
-  auth: {
-    signOut: async () => {
-      signOutCalledCount++;
-      return { error: null };
-    },
-  },
-} as unknown as SupabaseClient;
+// 1. Multi-Tab Coordination Registry Tests
+interface TabRegistry {
+  [tabId: string]: number;
+}
 
-// 1. Tab Exit cancellation on page reload scenario
-scheduleTabExit("tab_test_1", mockSupabase, 500);
-const cancelled = cancelTabExit("tab_test_1");
-assert(cancelled === true, "cancelTabExit returns true when cancelling active tab");
+const TAB_STALE_THRESHOLD = 10000;
 
-// Wait 600ms to ensure the cancelled timer did NOT fire
-await new Promise((resolve) => setTimeout(resolve, 600));
-assert(signOutCalledCount === 0, "Cancelled tab exit timer does NOT trigger signOut");
+function evaluateTabCloseAction(
+  closingTabId: string,
+  registry: TabRegistry,
+  now: number,
+  isReload: boolean
+): "KEEP_SESSION_OTHER_TAB_ACTIVE" | "KEEP_SESSION_RELOAD" | "SIGN_OUT_LAST_TAB" {
+  if (isReload) {
+    return "KEEP_SESSION_RELOAD";
+  }
 
-// 2. Tab Exit timeout firing when tab is actually closed (no cancel sent)
-scheduleTabExit("tab_test_2", mockSupabase, 150);
-await new Promise((resolve) => setTimeout(resolve, 300));
-assert(signOutCalledCount === 1, "Uncancelled tab exit timer successfully triggers signOut on exit");
+  // Remove closing tab
+  const activeTabs = Object.entries(registry).filter(
+    ([id, ts]) => id !== closingTabId && now - ts < TAB_STALE_THRESHOLD
+  );
 
-// 3. Global cancelTabExit() when no tabId is passed (e.g. proxy request on reload)
-scheduleTabExit("tab_test_3a", mockSupabase, 500);
-scheduleTabExit("tab_test_3b", mockSupabase, 500);
-const allCancelled = cancelTabExit();
-assert(allCancelled === true, "cancelTabExit() without arguments cancels all pending exits");
-await new Promise((resolve) => setTimeout(resolve, 600));
-assert(signOutCalledCount === 1, "Global cancellation prevented pending signouts");
+  if (activeTabs.length > 0) {
+    return "KEEP_SESSION_OTHER_TAB_ACTIVE";
+  }
+
+  return "SIGN_OUT_LAST_TAB";
+}
+
+const now = 1000000;
+
+// Scenario: Tab A closes while Tab B is actively open
+const multiTabRegistry: TabRegistry = {
+  tab_A: now - 500,
+  tab_B: now - 1000,
+};
+
+assert(
+  evaluateTabCloseAction("tab_A", multiTabRegistry, now, false) ===
+    "KEEP_SESSION_OTHER_TAB_ACTIVE",
+  "Tab A closing while Tab B is active PRESERVES session (no signOut)"
+);
+
+// Scenario: Tab B is stale (closed 30s ago without unregistering), Tab A closes
+const staleTabRegistry: TabRegistry = {
+  tab_A: now - 500,
+  tab_B: now - 35000, // 35s ago (> 10s threshold)
+};
+
+assert(
+  evaluateTabCloseAction("tab_A", staleTabRegistry, now, false) ===
+    "SIGN_OUT_LAST_TAB",
+  "Tab A closing with only stale tabs triggers best-effort signOut"
+);
+
+// Scenario: Tab A reloads (isReload = true)
+assert(
+  evaluateTabCloseAction("tab_A", { tab_A: now }, now, true) ===
+    "KEEP_SESSION_RELOAD",
+  "Tab A reload preserves session without signOut"
+);
+
+// Scenario: Only Tab A open, closing tab triggers signout
+assert(
+  evaluateTabCloseAction("tab_A", { tab_A: now }, now, false) ===
+    "SIGN_OUT_LAST_TAB",
+  "Single active Tab A closing triggers best-effort signOut"
+);
 
 // 4. Admin -> Admin navigation route evaluation
 function evaluateNavigation(

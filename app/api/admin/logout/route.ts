@@ -1,22 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { cancelTabExit } from "@/lib/supabase/admin-session";
 
 export async function POST(request: NextRequest) {
   try {
-    let tabId: string | undefined;
-    try {
-      const text = await request.text();
-      if (text) {
-        const body = JSON.parse(text);
-        tabId = body?.tabId;
-      }
-    } catch {
-      // payload could be malformed or empty
-    }
-
-    cancelTabExit(tabId);
-
     const supabase = await createClient();
     await supabase.auth.signOut();
 

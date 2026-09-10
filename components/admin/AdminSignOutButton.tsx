@@ -19,6 +19,19 @@ export function AdminSignOutButton() {
         sessionStorage.removeItem("nfc_admin_tab_id");
         sessionStorage.removeItem("nfc_admin_is_reloading");
 
+        if (tabId) {
+          try {
+            const raw = localStorage.getItem("nfc_admin_open_tabs");
+            if (raw) {
+              const registry = JSON.parse(raw);
+              delete registry[tabId];
+              localStorage.setItem("nfc_admin_open_tabs", JSON.stringify(registry));
+            }
+          } catch {
+            // ignore
+          }
+        }
+
         if (tabId && navigator.sendBeacon) {
           const payload = JSON.stringify({ tabId });
           const blob = new Blob([payload], { type: "application/json" });
